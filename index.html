@@ -89,8 +89,7 @@
                 provinceHtml_head += '\
                 <xy-popover class="area-body-item" trigger="hover">\
                     <div class="area-body-province">\
-                        <xy-checkbox class="area-body-province-t" onfocus=provinceFocus(this,event)>\
-                    ' + province.label + '</xy-checkbox>\
+                        <xy-checkbox class="area-body-province-t" onfocus=provinceFocus(this,event)>' + province.label + '</xy-checkbox>\
                     </div>\
                     <xy-popcon>\
                     <div class="area-body-city">\
@@ -102,13 +101,15 @@
                 '
                 province.children.forEach((city, cityIndex) => {
                     cityHtml += '\
-                        <xy-checkbox class="area-body-city-item" onfocus=cityFocus(this,event)>\
-                        ' + city.label + '\
+                        <xy-checkbox class="area-body-city-item" onfocus=cityFocus(this,event)>' + city.label + '\
                         </xy-checkbox>'
                 })
                 areaStr += provinceHtml_head + cityHtml + provinceHtml_footer
             })
             $('.area-body').html(areaStr)
+            // 由于新建和编辑放在一起，所以每次都要初始全选按钮状态
+            $('.area-footer-all').attr('checked', false)
+
         }
 
         function edit() {
