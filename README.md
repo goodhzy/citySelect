@@ -4,4 +4,4 @@
 样式使用的是xy-ui，官网地址为：[xy-ui](https://xy-ui.codelabo.cn/docs)
 
 效果图如下：
-![效果图](./effectImage/icon.svg)
+![效果图](https://github.com/goodhzy/citySelect/blob/master/effectImage/effectImage.png)
