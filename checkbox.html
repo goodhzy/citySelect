@@ -1,0 +1,74 @@
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'iconfont';
+            src: url('//at.alicdn.com/t/font_787538_40qxioi6whd.ttf') format('truetype')
+        }
+
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        label.bui-checkbox-label input {
+            position: absolute;
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        label.bui-checkbox-label .bui-checkbox {
+            display: inline-block;
+            position: relative;
+            width: 13px;
+            height: 13px;
+            background: #FFFFFF;
+            border: 1px solid #979797;
+            border-radius: 2px;
+            vertical-align: -2px;
+        }
+
+        label.bui-checkbox-label input:checked+.bui-checkbox:after {
+            font-family: "iconfont" !important;
+            color: #FFFFFF;
+            content: "\e6a2";
+            font-size: 13px;
+            line-height: 13px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scale(1.5);
+        }
+
+        label.bui-checkbox-label input:checked+.bui-checkbox {
+            background-color: #00B066;
+            border: 1px solid #00B066;
+        }
+
+        label.bui-radios-label input:disabled+.bui-radios {
+            background-color: #e8e8e8;
+            border: solid 1px #979797;
+        }
+
+        label.bui-radios-label input:disabled:checked+.bui-radios:after {
+            background-color: #c1c1c1;
+        }
+
+        label.bui-checkbox-label.bui-checkbox-anim .bui-checkbox {
+            transition: background-color ease-out .3s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <label class="bui-checkbox-label  bui-checkbox-anim">
+        <input type="checkbox"><i class="bui-checkbox iconfont"></i>男
+    </label>
+</body>
+
+</html>

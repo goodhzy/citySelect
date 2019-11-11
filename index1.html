@@ -1,3 +1,9 @@
+<!-- 
+    1. 由于index.html有点卡顿（原因是xy-checkbox），所以当前页面自己编写checkbox样式
+    2. 没有写indeterminate样式
+    3. 只实现了全选逻辑
+    4. 以后有空实现，并实现3级联动
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,21 +28,18 @@
 
         .area-body-item {
             width: 180px;
+            margin: 10px;
         }
 
         .area-body-province {
             position: relative;
         }
 
-        .area-body-province-t {
-            padding: 5px;
-            margin-top: 10px;
-
-        }
-
         .area-body-city {
             padding: 0 20px 10px;
             width: 300px;
+            display: flex;
+            flex-wrap: wrap;
         }
 
         .area-body-city-item {
@@ -56,7 +59,71 @@
         }
 
         .area-footer-all {
-            margin-left: 5px;
+            margin-left: 9px;
+        }
+
+        @font-face {
+            font-family: 'iconfont';
+            src: url('//at.alicdn.com/t/font_787538_40qxioi6whd.ttf') format('truetype')
+        }
+
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        label{
+            font-size: 14px;
+            color: #333;
+        }
+        label.bui-checkbox-label input {
+            position: absolute;
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        label.bui-checkbox-label .bui-checkbox {
+            display: inline-block;
+            position: relative;
+            width: 13px;
+            height: 13px;
+            background: #FFFFFF;
+            border: 1px solid #979797;
+            border-radius: 2px;
+            vertical-align: -2px;
+            margin-right: 10px;
+        }
+
+        label.bui-checkbox-label input:checked+.bui-checkbox:after {
+            font-family: "iconfont" !important;
+            color: #FFFFFF;
+            content: "\e6a2";
+            font-size: 13px;
+            line-height: 13px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scale(1.5);
+        }
+
+        label.bui-checkbox-label input:checked+.bui-checkbox {
+            background-color: #00B066;
+            border: 1px solid #00B066;
+        }
+
+        label.bui-radios-label input:disabled+.bui-radios {
+            background-color: #e8e8e8;
+            border: solid 1px #979797;
+        }
+
+        label.bui-radios-label input:disabled:checked+.bui-radios:after {
+            background-color: #c1c1c1;
+        }
+
+        label.bui-checkbox-label.bui-checkbox-anim .bui-checkbox {
+            transition: background-color ease-out .3s;
         }
     </style>
 </head>
@@ -66,7 +133,9 @@
         <div class="area">
             <div class="area-body" id="areaBody"></div>
             <div class="area-footer">
-                <xy-checkbox class="area-footer-all" onfocus="allFocus(this)">全选</xy-checkbox>
+                <label class="bui-checkbox-label bui-checkbox-anim area-footer-all" onclick="allFocus(this)">
+                    <input type="checkbox"><i class="bui-checkbox iconfont"></i>全选
+                </label>
             </div>
         </div>
     </xy-dialog>
@@ -77,7 +146,7 @@
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
     <script src="./js/cityData.js"></script>
     <!-- 模板语法 -->
-	<!-- <script src="./js/artTemplate.js"></script>
+    <!-- <script src="./js/artTemplate.js"></script>
     <script type="text/html" id="areaDialog">
         {{ each cityData }}{{set province = $value}}
         <xy-popover class="area-body-item" trigger="hover">
@@ -97,21 +166,21 @@
     <script>
         var dataStr = ''
         let isFirst = true
-        function createHtml(){
-            if(!isFirst){
-                return 
+
+        function createHtml() {
+            if (!isFirst) {
+                return
             }
             var areaStr = ''
             cityData.forEach((province, provinceIndex) => {
                 var provinceHtml_head = ''
                 var provinceHtml_footer = ''
                 var cityHtml = ''
-                provinceHtml_head += '\
+                provinceHtml_head +=
+                    '\
                 <xy-popover class="area-body-item" trigger="hover">\
-                    <div class="area-body-province">\
-                        <xy-checkbox class="area-body-province-t" onfocus=provinceFocus(this,event)>' + province
-                    .label + '</xy-checkbox>\
-                    </div>\
+                    <label class="bui-checkbox-label bui-checkbox-anim area-body-province"><input type="checkbox" class="area-body-province-t"><i class="bui-checkbox iconfont"></i>' +
+                    province.label + '</label>\
                     <xy-popcon>\
                     <div class="area-body-city">\
                    '
@@ -121,9 +190,9 @@
                 </xy-popover>\
                 '
                 province.children.forEach((city, cityIndex) => {
-                    cityHtml += '\
-                        <xy-checkbox class="area-body-city-item" onfocus=cityFocus(this,event)>' + city.label + '\
-                        </xy-checkbox>'
+                    cityHtml +=
+                        '<div class="area-body-city-item"><label class="bui-checkbox-label bui-checkbox-anim"><input type="checkbox" class="area-body-city-item"><i class="bui-checkbox iconfont"></i>' +
+                        city.label + '</label></div>'
                 })
                 areaStr += provinceHtml_head + cityHtml + provinceHtml_footer
             })
@@ -131,6 +200,7 @@
             $('.area-footer-all').attr('checked', false)
             isFirst = false
         }
+
         function init() {
             console.time('初始化时间')
             document.getElementById('area-dialog').open = true
@@ -185,16 +255,15 @@
         }
 
         function allFocus(e) {
-            e.blur()
             console.time('点击全选耗费时间')
+            console.log($(e).find('input'))
+            let checked = $(e).find('input').prop('checked')
+            console.log(checked)
             $('.area-body-item').each(function (pIndex, p) {
                 let $province = $(p).find('.area-body-province-t')
-                if ($province[0].indeterminate) {
-                    $province[0].indeterminate = false
-                }
-                $province.attr('checked', !e.checked)
+                $province[0].checked = checked
                 $(p).find('.area-body-city-item').each(function (cIndex, c) {
-                    c.checked = !e.checked
+                    c.checked = checked
                 })
             })
             console.timeEnd('点击全选耗费时间')
