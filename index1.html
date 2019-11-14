@@ -1,7 +1,5 @@
 <!-- 
     1. 由于index.html有点卡顿（原因是xy-checkbox），所以当前页面自己编写checkbox样式
-    2. 没有写indeterminate样式
-    3. 只实现了全选逻辑
     4. 以后有空实现，并实现3级联动
 -->
 <!DOCTYPE html>
@@ -64,7 +62,7 @@
 
         @font-face {
             font-family: 'iconfont';
-            src: url('//at.alicdn.com/t/font_787538_40qxioi6whd.ttf') format('truetype')
+            src: url('//at.alicdn.com/t/font_787538_2ytq9x41szh.ttf') format('truetype')
         }
 
         .iconfont {
@@ -74,10 +72,12 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        label{
+
+        label {
             font-size: 14px;
             color: #333;
         }
+
         label.bui-checkbox-label input {
             position: absolute;
             visibility: hidden;
@@ -96,7 +96,7 @@
             margin-right: 10px;
         }
 
-        label.bui-checkbox-label input:checked+.bui-checkbox:after {
+        label.bui-checkbox-label input:checked + .bui-checkbox:after {
             font-family: "iconfont" !important;
             color: #FFFFFF;
             content: "\e6a2";
@@ -108,17 +108,34 @@
             transform: scale(1.5);
         }
 
-        label.bui-checkbox-label input:checked+.bui-checkbox {
+        label.bui-checkbox-label input:checked + .bui-checkbox {
             background-color: #00B066;
             border: 1px solid #00B066;
         }
 
-        label.bui-radios-label input:disabled+.bui-radios {
+        label.bui-checkbox-label input:indeterminate + .bui-checkbox:after {
+            font-family: "iconfont" !important;
+            color: #FFFFFF;
+            content: "\e601";
+            font-size: 13px;
+            line-height: 13px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scale(1.2);
+        }
+
+        label.bui-checkbox-label input:indeterminate + .bui-checkbox {
+            background-color: #00B066;
+            border: 1px solid #00B066;
+        }
+
+        label.bui-radios-label input:disabled + .bui-checkbox {
             background-color: #e8e8e8;
             border: solid 1px #979797;
         }
 
-        label.bui-radios-label input:disabled:checked+.bui-radios:after {
+        label.bui-radios-label input:disabled:checked + .bui-checkbox:after {
             background-color: #c1c1c1;
         }
 
@@ -129,215 +146,185 @@
 </head>
 
 <body>
-    <xy-dialog id="area-dialog" title="请选择配送区域" oktext="确 定" canceltext="取消" onsubmit="confirm()">
-        <div class="area">
-            <div class="area-body" id="areaBody"></div>
-            <div class="area-footer">
-                <label class="bui-checkbox-label bui-checkbox-anim area-footer-all" onclick="allFocus(this)">
-                    <input type="checkbox"><i class="bui-checkbox iconfont"></i>全选
-                </label>
-            </div>
+<xy-dialog id="area-dialog" title="请选择配送区域" oktext="确 定" canceltext="取消" onsubmit="confirm()">
+    <div class="area">
+        <div class="area-body" id="areaBody"></div>
+        <div class="area-footer">
+            <label class="bui-checkbox-label bui-checkbox-anim area-footer-all">
+                <input type="checkbox" onclick="allClick(this,event)"><i class="bui-checkbox iconfont"></i>全选
+            </label>
         </div>
-    </xy-dialog>
+    </div>
+</xy-dialog>
 
-    <xy-button type="primary" onclick="init()">新建</xy-button>
-    <xy-button type="primary" onclick="edit()">修改</xy-button>
+<xy-button type="primary" onclick="init()">新建</xy-button>
+<xy-button type="primary" onclick="edit()">修改</xy-button>
 
-    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
-    <script src="./js/cityData.js"></script>
-    <!-- 模板语法 -->
-    <!-- <script src="./js/artTemplate.js"></script>
-    <script type="text/html" id="areaDialog">
-        {{ each cityData }}{{set province = $value}}
-        <xy-popover class="area-body-item" trigger="hover">
-            <div class="area-body-province">
-                <xy-checkbox class="area-body-province-t" onfocus=provinceFocus(this,event)>{{province.label}}</xy-checkbox>
-            </div>
-            {{ each province.children }}{{set city = $value }}
-            <xy-popcon>
-            <div class="area-body-city">
-                <xy-checkbox class="area-body-city-item" onfocus=cityFocus(this,event)>{{city.label}}</xy-checkbox>
-            </div>
-            </xy-popcon>
-            {{ /each }}
-        </xy-popover>
-        {{ /each }}
-    </script> -->
-    <script>
-        var dataStr = ''
-        let isFirst = true
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="./js/cityData.js"></script>
+<script>
 
-        function createHtml() {
-            if (!isFirst) {
-                return
-            }
-            var areaStr = ''
-            cityData.forEach((province, provinceIndex) => {
-                var provinceHtml_head = ''
-                var provinceHtml_footer = ''
-                var cityHtml = ''
-                provinceHtml_head +=
-                    '\
-                <xy-popover class="area-body-item" trigger="hover">\
-                    <label class="bui-checkbox-label bui-checkbox-anim area-body-province"><input type="checkbox" class="area-body-province-t"><i class="bui-checkbox iconfont"></i>' +
-                    province.label + '</label>\
+    var dataStr = ''
+    let isFirst = true
+
+    function createHtml() {
+        if (!isFirst) {
+            return
+        }
+        var areaStr = ''
+        cityData.forEach((province, provinceIndex) => {
+            var provinceHtml_head = ''
+            var provinceHtml_footer = ''
+            var cityHtml = ''
+            provinceHtml_head +=
+                '\
+            <xy-popover class="area-body-item" trigger="hover">\
+                <label class="bui-checkbox-label bui-checkbox-anim area-body-province"><input type="checkbox" class="area-body-province-t" onclick="provinceClick(this,event)"><i class="bui-checkbox iconfont"></i>' +
+                province.label + '</label>\
                     <xy-popcon>\
                     <div class="area-body-city">\
                    '
-                provinceHtml_footer += '\
+            provinceHtml_footer += '\
                 </div>\
                 </xy-popcon>\
                 </xy-popover>\
                 '
-                province.children.forEach((city, cityIndex) => {
-                    cityHtml +=
-                        '<div class="area-body-city-item"><label class="bui-checkbox-label bui-checkbox-anim"><input type="checkbox" class="area-body-city-item"><i class="bui-checkbox iconfont"></i>' +
-                        city.label + '</label></div>'
-                })
-                areaStr += provinceHtml_head + cityHtml + provinceHtml_footer
+            province.children.forEach((city, cityIndex) => {
+                cityHtml +=
+                    '<div class="area-body-city-item"><label class="bui-checkbox-label bui-checkbox-anim"><input type="checkbox" class="area-body-city-item-input" onclick="cityClick(this,event)"><i class="bui-checkbox iconfont"></i>' +
+                    city.label + '</label></div>'
             })
-            $('.area-body').html(areaStr)
-            $('.area-footer-all').attr('checked', false)
-            isFirst = false
-        }
+            areaStr += provinceHtml_head + cityHtml + provinceHtml_footer
+        })
+        $('.area-body').html(areaStr)
+        $('.area-footer-all').find('input').prop('checked', false)
+        isFirst = false
+    }
 
-        function init() {
-            console.time('初始化时间')
-            document.getElementById('area-dialog').open = true
-            createHtml()
-            $('.area-body-item').each(function (pIndex, p) {
-                let $province = $(p).find('.area-body-province-t')
-                $province.attr('checked', false)
-                if ($province[0].indeterminate) {
-                    $province[0].indeterminate = false
-                }
-                $(p).find('.area-body-city-item').each(function (cIndex, c) {
-                    c.checked = false
-                })
+    function init() {
+        document.getElementById('area-dialog').open = true
+        createHtml()
+        $('.area-body-item').each(function (pIndex, p) {
+            let $province = $(p).find('.area-body-province-t')
+            $province.prop('checked', false)
+            if ($province[0].indeterminate) {
+                $province[0].indeterminate = false
+            }
+            $(p).find('.area-body-city-item-input').each(function (cIndex, c) {
+                c.checked = false
             })
-            $('.area-footer-all').attr('checked', false)
-            console.timeEnd('初始化时间')
-        }
+        })
+        $('.area-footer-all').prop('checked', false)
+    }
 
-        function edit() {
-            console.time('编辑时间')
-            document.getElementById('area-dialog').open = true
-            createHtml()
-            let arr = dataStr.split(',')
-            let start = 0
-            for (let i = 0; i < arr.length; i++) {
-                (function () {
-                    for (let j = start; j < cityData.length; j++) {
-                        let province = cityData[j]
-                        if (arr[i] == province.label) {
-                            $('.area-body-province-t')[j].checked = true
-                            $($('.area-body-item')[j]).find('.area-body-city-item').each(function (cIndex, c) {
-                                c.checked = true
-                            })
-                            $('.area-footer-all').attr('checked', isCheckAll_province())
-                            start = j + 1
-                            return;
-                        } else {
-                            for (let k = 0; k < province.children.length; k++) {
-                                const city = province.children[k];
-                                if (arr[i] == city.label) {
-                                    $($('.area-body-item')[j]).find('.area-body-city-item')[k].checked = true
-                                    $('.area-body-province-t')[j].indeterminate = true
-                                    start = j
-                                    return;
-                                }
+    function edit() {
+        document.getElementById('area-dialog').open = true
+        createHtml()
+        let arr = dataStr.split(',')
+        let start = 0
+        for (let i = 0; i < arr.length; i++) {
+            (function () {
+                for (let j = start; j < cityData.length; j++) {
+                    let province = cityData[j]
+                    if (arr[i] == province.label) {
+                        $('.area-body-province-t')[j].checked = true
+                        $($('.area-body-item')[j]).find('.area-body-city-item-input').each(function (cIndex, c) {
+                            c.checked = true
+                        })
+                        $('.area-footer-all').find('input').prop('checked', isCheckAll_province())
+                        start = j + 1
+                        return;
+                    } else {
+                        for (let k = 0; k < province.children.length; k++) {
+                            const city = province.children[k];
+                            if (arr[i] == city.label) {
+                                $($('.area-body-item')[j]).find('.area-body-city-item-input')[k].checked = true
+                                $('.area-body-province-t')[j].indeterminate = true
+                                start = j
+                                return;
                             }
                         }
                     }
-                })();
-            }
-            console.timeEnd('编辑时间')
+                }
+            })();
         }
+    }
 
-        function allFocus(e) {
-            console.time('点击全选耗费时间')
-            console.log($(e).find('input'))
-            let checked = $(e).find('input').prop('checked')
-            console.log(checked)
-            $('.area-body-item').each(function (pIndex, p) {
-                let $province = $(p).find('.area-body-province-t')
-                $province[0].checked = checked
-                $(p).find('.area-body-city-item').each(function (cIndex, c) {
-                    c.checked = checked
-                })
+    function allClick(e,event) {
+        let checked = $(e).prop('checked')
+        $('.area-body-item').each(function (pIndex, p) {
+            $(p).find('.area-body-province-t').prop({'checked':checked, 'indeterminate':false})
+            $(p).find('.area-body-city-item-input').each(function (cIndex, c) {
+                c.checked = checked
             })
-            console.timeEnd('点击全选耗费时间')
-        }
+        })
+    }
 
-        function provinceFocus(e, event) {
-            setTimeout(function () {
-                e.blur()
-                event.stopPropagation()
-                $(e).parents('.area-body-item').find('.area-body-city-item').each(function (cIndex, c) {
-                    c.checked = e.checked
-                })
-                $('.area-footer-all').attr('checked', isCheckAll_province())
-            }, 0)
-        }
+    function provinceClick(e, event) {
+        event.stopPropagation()
+        let checked = $(e).prop('checked')
+        $(e).parents('.area-body-item').find('.area-body-city-item-input').each(function (cIndex, c) {
+            c.checked = checked
+        })
+        $('.area-footer-all').find('input').prop('checked', isCheckAll_province())
+    }
 
-        function cityFocus(e, event) {
-            setTimeout(function () {
-                e.blur()
-                event.stopPropagation()
-                var $province = $(e).parents('.area-body-item').find('.area-body-province-t')
-                var _province = $province[0]
-                var isCheckAll_false = true
-                var isCheckAll_true = true
-                $(e).parents('.area-body-city').find('.area-body-city-item').each(function (cIndex, c) {
+    function cityClick(e, event) {
+            event.stopPropagation()
+            var $province = $(e).parents('.area-body-item').find('.area-body-province-t')
+            var _province = $province[0]
+            var isCheckAll_false = true
+            var isCheckAll_true = true
+            $(e).parents('.area-body-city').find('.area-body-city-item-input').each(function (cIndex, c) {
+                if (c.checked) {
+                    isCheckAll_false = false
+                } else {
+                    isCheckAll_true = false
+                }
+            })
+            if (isCheckAll_false) {
+                _province.checked = false
+                _province.indeterminate = false
+            } else if (isCheckAll_true) {
+                _province.checked = true
+                _province.indeterminate = false
+            } else {
+                _province.checked = false
+                _province.indeterminate = true
+            }
+            $('.area-footer-all').find('input').prop('checked', isCheckAll_province())
+    }
+
+    function isCheckAll_province() {
+        let isCheckAll = true
+        $('.area-body-province-t').each(function (pIndex, p) {
+            if (!p.checked) {
+                isCheckAll = false
+            }
+        })
+        return isCheckAll
+    }
+
+    // 确定按钮事件
+    function confirm() {
+        let arr = []
+        dataStr = ''
+        $('.area-body-item').each(function (pIndex, p) {
+            var $province = $(p).find('.area-body-province-t')
+            if ($province.prop('checked')) {
+                arr.push($province.parent().text())
+            } else if ($province[0].indeterminate) {
+                $(p).find('.area-body-city-item-input').each(function (cIndex, c) {
                     if (c.checked) {
-                        isCheckAll_false = false
-                    } else {
-                        isCheckAll_true = false
+                        arr.push(c.parentNode.textContent)
                     }
                 })
-                if (isCheckAll_false) {
-                    _province.checked = false
-                    _province.indeterminate = false
-                } else if (isCheckAll_true) {
-                    _province.checked = true
-                    _province.indeterminate = false
-                } else {
-                    _province.checked = false
-                    _province.indeterminate = true
-                }
-                $('.area-footer-all').attr('checked', isCheckAll_province())
-            }, 0)
-        }
-
-        function isCheckAll_province() {
-            let isCheckAll = true
-            $('.area-body-province-t').each(function (pIndex, p) {
-                if (!p.checked) {
-                    isCheckAll = false
-                }
-            })
-            return isCheckAll
-        }
-        // 确定按钮事件
-        function confirm() {
-            let arr = []
-            dataStr = ''
-            $('.area-body-item').each(function (pIndex, p) {
-                var $province = $(p).find('.area-body-province-t')
-                if ($province.attr('checked')) {
-                    arr.push($province.text())
-                } else if ($province[0].indeterminate) {
-                    $(p).find('.area-body-city-item').each(function (cIndex, c) {
-                        if (c.checked) {
-                            arr.push(c.textContent)
-                        }
-                    })
-                }
-            })
-            dataStr = arr.join(',')
-            console.log(dataStr)
-        }
-    </script>
+            }
+        })
+        dataStr = arr.join(',')
+        console.log(dataStr)
+    }
+</script>
 </body>
 
 </html>

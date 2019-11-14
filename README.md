@@ -7,4 +7,4 @@
 ![效果图](https://github.com/goodhzy/citySelect/blob/master/effectImage/effectImage.png)
 
 index.html: 使用xy-checkbox组件，性能不好
-index1.html: 自己编写checkbox样式，性能还行，但是没有完善，以后再完善
+index1.html: 自己编写checkbox样式，性能还行，建议使用这个

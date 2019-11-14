@@ -186,7 +186,7 @@
 
         function allFocus(e) {
             e.blur()
-            console.time('点击全选耗费时间')
+            console.profile('label')
             $('.area-body-item').each(function (pIndex, p) {
                 let $province = $(p).find('.area-body-province-t')
                 if ($province[0].indeterminate) {
@@ -197,7 +197,7 @@
                     c.checked = !e.checked
                 })
             })
-            console.timeEnd('点击全选耗费时间')
+            console.profileEnd('label')
         }
 
         function provinceFocus(e, event) {
